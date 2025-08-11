@@ -2116,7 +2116,7 @@
   resolved "https://registry.npmjs.org/@medusajs/file/-/file-2.8.8.tgz"
   integrity sha512-W3ZkpcW4RHj8qFSp0FT3PbRVAqS71gI111gEntvrmitDGUVz0knS2otKkTwtUv9QmcsM6RuQVp0Oc6x4cijSqA==
 
-"@medusajs/framework@^0.0.1", "@medusajs/framework@2.8.8":
+"@medusajs/framework@2.8.8":
   version "0.0.1"
   resolved "https://registry.npmjs.org/@medusajs/framework/-/framework-0.0.1.tgz"
   integrity sha512-eUtMLGiQLNnwzapRzUexnKE8g2HfgAgd28dg6Eu7/A5+/FG9SJ/jSFxGaihUTsaXH4inqV/dh1wV6oBVlXa26g==
@@ -2215,7 +2215,7 @@
     winston "^3.8.2"
     yargs "^15.3.1"
 
-"@medusajs/medusa@^2.0.0", "@medusajs/medusa@2.8.8":
+"@medusajs/medusa@2.8.8":
   version "2.8.8"
   resolved "https://registry.npmjs.org/@medusajs/medusa/-/medusa-2.8.8.tgz"
   integrity sha512-l09XXQTlRmA7qKd0iDzT4oADaB3MQJmb2PdbfMiXvDA4hV86NUTvZMkJ30FLSbaRCMXW2QTJq20/ilHVkV0oZQ==
