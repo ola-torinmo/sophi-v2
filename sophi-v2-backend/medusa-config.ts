@@ -66,6 +66,7 @@ async function ensureTablesExist() {
       // Payment Provider table
       `CREATE TABLE IF NOT EXISTS payment_provider (
         id VARCHAR(255) PRIMARY KEY,
+        handle VARCHAR(255),
         is_installed BOOLEAN DEFAULT true,
         is_enabled BOOLEAN DEFAULT true,
         created_at TIMESTAMP DEFAULT NOW(),
@@ -76,6 +77,7 @@ async function ensureTablesExist() {
       // Fulfillment Provider table
       `CREATE TABLE IF NOT EXISTS fulfillment_provider (
         id VARCHAR(255) PRIMARY KEY,
+        handle VARCHAR(255),
         is_installed BOOLEAN DEFAULT true,
         is_enabled BOOLEAN DEFAULT true,
         created_at TIMESTAMP DEFAULT NOW(),
@@ -86,6 +88,7 @@ async function ensureTablesExist() {
       // Notification Provider table
       `CREATE TABLE IF NOT EXISTS notification_provider (
         id VARCHAR(255) PRIMARY KEY,
+        handle VARCHAR(255),
         is_installed BOOLEAN DEFAULT true,
         is_enabled BOOLEAN DEFAULT true,
         created_at TIMESTAMP DEFAULT NOW(),
@@ -128,12 +131,43 @@ async function ensureTablesExist() {
       await client.query(tableQuery)
     }
 
-    // Insert default providers
+    // Add missing columns to existing tables
+    const alterTableQueries = [
+      // Add missing columns to currency table
+      `ALTER TABLE currency ADD COLUMN IF NOT EXISTS decimal_digits INTEGER DEFAULT 2`,
+      
+      // Add missing columns to tax_provider table
+      `ALTER TABLE tax_provider ADD COLUMN IF NOT EXISTS is_enabled BOOLEAN DEFAULT true`,
+      
+      // Add missing columns to payment_provider table (if it exists)
+      `ALTER TABLE payment_provider ADD COLUMN IF NOT EXISTS handle VARCHAR(255)`,
+      `ALTER TABLE payment_provider ADD COLUMN IF NOT EXISTS is_enabled BOOLEAN DEFAULT true`,
+      
+      // Add missing columns to fulfillment_provider table (if it exists)
+      `ALTER TABLE fulfillment_provider ADD COLUMN IF NOT EXISTS handle VARCHAR(255)`,
+      `ALTER TABLE fulfillment_provider ADD COLUMN IF NOT EXISTS is_enabled BOOLEAN DEFAULT true`,
+      
+      // Add missing columns to notification_provider table (if it exists)
+      `ALTER TABLE notification_provider ADD COLUMN IF NOT EXISTS handle VARCHAR(255)`,
+      `ALTER TABLE notification_provider ADD COLUMN IF NOT EXISTS is_enabled BOOLEAN DEFAULT true`
+    ]
+
+    // Execute alter table queries with error handling
+    for (const alterQuery of alterTableQueries) {
+      try {
+        await client.query(alterQuery)
+      } catch (alterError) {
+        // Ignore errors for columns that already exist or other non-critical issues
+        console.log(`Note: ${alterError instanceof Error ? alterError.message : 'Alter query failed'}`)
+      }
+    }
+
+    // Insert default providers with handles
     const insertQueries = [
-      `INSERT INTO tax_provider (id, is_enabled) VALUES ('tp_system', true) ON CONFLICT (id) DO NOTHING`,
-      `INSERT INTO payment_provider (id, is_enabled) VALUES ('pp_system_default', true) ON CONFLICT (id) DO NOTHING`,
-      `INSERT INTO fulfillment_provider (id, is_enabled) VALUES ('fp_manual', true) ON CONFLICT (id) DO NOTHING`,
-      `INSERT INTO notification_provider (id, is_enabled) VALUES ('np_sendgrid', true) ON CONFLICT (id) DO NOTHING`
+      `INSERT INTO tax_provider (id, is_enabled) VALUES ('tp_system', true) ON CONFLICT (id) DO UPDATE SET is_enabled = true`,
+      `INSERT INTO payment_provider (id, handle, is_enabled) VALUES ('pp_system_default', 'system', true) ON CONFLICT (id) DO UPDATE SET is_enabled = true, handle = 'system'`,
+      `INSERT INTO fulfillment_provider (id, handle, is_enabled) VALUES ('fp_manual', 'manual', true) ON CONFLICT (id) DO UPDATE SET is_enabled = true, handle = 'manual'`,
+      `INSERT INTO notification_provider (id, handle, is_enabled) VALUES ('np_sendgrid', 'sendgrid', true) ON CONFLICT (id) DO UPDATE SET is_enabled = true, handle = 'sendgrid'`
     ]
 
     for (const insertQuery of insertQueries) {
